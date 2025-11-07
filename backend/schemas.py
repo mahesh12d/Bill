@@ -48,64 +48,37 @@ class Bill(BaseModel):
         populate_by_name = True
 
 
-class RateCardBase(BaseModel):
-    """Base schema for rate card."""
-    name: str
-    createdDate: str
-
-
-class RateCardCreate(RateCardBase):
-    """Schema for creating a rate card."""
-    pass
-
-
-class RateCardItemBase(BaseModel):
-    """Base schema for rate card item."""
+class LeisureItemBase(BaseModel):
+    """Base schema for leisure item."""
     srNo: int
     description: str
     laborWork: str
     materialSpecs: str
     rateWithMaterial: str
-    displayOrder: int
 
 
-class RateCardItemCreate(RateCardItemBase):
-    """Schema for creating a rate card item."""
-    rateCardId: UUID
+class LeisureItemCreate(LeisureItemBase):
+    """Schema for creating a leisure item."""
+    pass
 
 
-class RateCardItemUpdate(BaseModel):
-    """Schema for updating a rate card item."""
+class LeisureItemUpdate(BaseModel):
+    """Schema for updating a leisure item."""
     srNo: Optional[int] = None
     description: Optional[str] = None
     laborWork: Optional[str] = None
     materialSpecs: Optional[str] = None
     rateWithMaterial: Optional[str] = None
-    displayOrder: Optional[int] = None
 
 
-class RateCardItem(BaseModel):
-    """Schema for rate card item response."""
+class LeisureItem(BaseModel):
+    """Schema for leisure item response."""
     id: int
-    rateCardId: UUID = Field(alias="rate_card_id")
     srNo: int = Field(alias="sr_no")
     description: str
     laborWork: str = Field(alias="labor_work")
     materialSpecs: str = Field(alias="material_specs")
     rateWithMaterial: str = Field(alias="rate_with_material")
-    displayOrder: int = Field(alias="display_order")
-
-    class Config:
-        from_attributes = True
-        populate_by_name = True
-
-
-class RateCard(BaseModel):
-    """Schema for rate card response."""
-    id: UUID
-    name: str
-    createdDate: str = Field(alias="created_date")
-    items: List[RateCardItem] = []
 
     class Config:
         from_attributes = True

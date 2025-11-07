@@ -2,7 +2,7 @@
 import os
 import uvicorn
 from backend.database import Base, engine
-from backend.seed_data import seed_rate_card_items
+from backend.seed_data import seed_leisure_items
 
 if __name__ == "__main__":
     # Create tables
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # Seed initial data
     print("Seeding initial data...")
     try:
-        seed_rate_card_items()
+        seed_leisure_items()
     except Exception as e:
         print(f"Note: {e}")
     

@@ -142,99 +142,32 @@ def delete_bill(bill_id: str, db: Session = Depends(get_db)):
     return None
 
 
-# Rate Card Endpoints
-@app.get("/api/rate-cards", response_model=List[schemas.RateCard])
-def get_rate_cards(db: Session = Depends(get_db)):
-    """Get all rate cards with their items."""
-    rate_cards = db.query(models.RateCard).all()
-    return rate_cards
-
-
-@app.get("/api/rate-cards/{rate_card_id}", response_model=schemas.RateCard)
-def get_rate_card(rate_card_id: str, db: Session = Depends(get_db)):
-    """Get a specific rate card by ID."""
-    try:
-        rate_card_uuid = uuid.UUID(rate_card_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid rate card ID format")
-    
-    rate_card = db.query(models.RateCard).filter(models.RateCard.id == rate_card_uuid).first()
-    if not rate_card:
-        raise HTTPException(status_code=404, detail="Rate card not found")
-    return rate_card
-
-
-@app.post("/api/rate-cards", response_model=schemas.RateCard, status_code=status.HTTP_201_CREATED)
-def create_rate_card(rate_card: schemas.RateCardCreate, db: Session = Depends(get_db)):
-    """Create a new rate card."""
-    db_rate_card = models.RateCard(
-        name=rate_card.name,
-        created_date=rate_card.createdDate
-    )
-    
-    db.add(db_rate_card)
-    try:
-        db.commit()
-        db.refresh(db_rate_card)
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=400, detail=f"Error creating rate card: {str(e)}")
-    
-    return db_rate_card
-
-
-@app.delete("/api/rate-cards/{rate_card_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_rate_card(rate_card_id: str, db: Session = Depends(get_db)):
-    """Delete a rate card and all its items."""
-    try:
-        rate_card_uuid = uuid.UUID(rate_card_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid rate card ID format")
-    
-    db_rate_card = db.query(models.RateCard).filter(models.RateCard.id == rate_card_uuid).first()
-    if not db_rate_card:
-        raise HTTPException(status_code=404, detail="Rate card not found")
-    
-    db.delete(db_rate_card)
-    db.commit()
-    return None
-
-
-# Rate Card Item Endpoints
-@app.get("/api/rate-cards/{rate_card_id}/items", response_model=List[schemas.RateCardItem])
-def get_rate_card_items(rate_card_id: str, db: Session = Depends(get_db)):
-    """Get all items for a specific rate card."""
-    try:
-        rate_card_uuid = uuid.UUID(rate_card_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid rate card ID format")
-    
-    items = db.query(models.RateCardItem).filter(
-        models.RateCardItem.rate_card_id == rate_card_uuid
-    ).order_by(models.RateCardItem.display_order).all()
+# Leisure Item Endpoints
+@app.get("/api/leisure-items", response_model=List[schemas.LeisureItem])
+def get_leisure_items(db: Session = Depends(get_db)):
+    """Get all leisure items, sorted by serial number."""
+    items = db.query(models.LeisureItem).order_by(models.LeisureItem.sr_no).all()
     return items
 
 
-@app.post("/api/rate-cards/{rate_card_id}/items", response_model=schemas.RateCardItem, status_code=status.HTTP_201_CREATED)
-def create_rate_card_item(rate_card_id: str, item: schemas.RateCardItemCreate, db: Session = Depends(get_db)):
-    """Create a new rate card item."""
-    try:
-        rate_card_uuid = uuid.UUID(rate_card_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid rate card ID format")
-    
-    rate_card = db.query(models.RateCard).filter(models.RateCard.id == rate_card_uuid).first()
-    if not rate_card:
-        raise HTTPException(status_code=404, detail="Rate card not found")
-    
-    db_item = models.RateCardItem(
-        rate_card_id=rate_card_uuid,
+@app.get("/api/leisure-items/{item_id}", response_model=schemas.LeisureItem)
+def get_leisure_item(item_id: int, db: Session = Depends(get_db)):
+    """Get a specific leisure item by ID."""
+    item = db.query(models.LeisureItem).filter(models.LeisureItem.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Leisure item not found")
+    return item
+
+
+@app.post("/api/leisure-items", response_model=schemas.LeisureItem, status_code=status.HTTP_201_CREATED)
+def create_leisure_item(item: schemas.LeisureItemCreate, db: Session = Depends(get_db)):
+    """Create a new leisure item."""
+    db_item = models.LeisureItem(
         sr_no=item.srNo,
         description=item.description,
         labor_work=item.laborWork,
         material_specs=item.materialSpecs,
-        rate_with_material=item.rateWithMaterial,
-        display_order=item.displayOrder
+        rate_with_material=item.rateWithMaterial
     )
     
     db.add(db_item)
@@ -243,25 +176,17 @@ def create_rate_card_item(rate_card_id: str, item: schemas.RateCardItemCreate, d
         db.refresh(db_item)
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=400, detail=f"Error creating rate card item: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Error creating leisure item: {str(e)}")
     
     return db_item
 
 
-@app.put("/api/rate-cards/{rate_card_id}/items/{item_id}", response_model=schemas.RateCardItem)
-def update_rate_card_item(rate_card_id: str, item_id: int, item: schemas.RateCardItemUpdate, db: Session = Depends(get_db)):
-    """Update an existing rate card item."""
-    try:
-        rate_card_uuid = uuid.UUID(rate_card_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid rate card ID format")
-    
-    db_item = db.query(models.RateCardItem).filter(
-        models.RateCardItem.id == item_id,
-        models.RateCardItem.rate_card_id == rate_card_uuid
-    ).first()
+@app.put("/api/leisure-items/{item_id}", response_model=schemas.LeisureItem)
+def update_leisure_item(item_id: int, item: schemas.LeisureItemUpdate, db: Session = Depends(get_db)):
+    """Update an existing leisure item."""
+    db_item = db.query(models.LeisureItem).filter(models.LeisureItem.id == item_id).first()
     if not db_item:
-        raise HTTPException(status_code=404, detail="Rate card item not found")
+        raise HTTPException(status_code=404, detail="Leisure item not found")
     
     update_data = item.model_dump(exclude_unset=True)
     for field, value in update_data.items():
@@ -273,8 +198,6 @@ def update_rate_card_item(rate_card_id: str, item_id: int, item: schemas.RateCar
             setattr(db_item, "material_specs", value)
         elif field == "rateWithMaterial":
             setattr(db_item, "rate_with_material", value)
-        elif field == "displayOrder":
-            setattr(db_item, "display_order", value)
         else:
             setattr(db_item, field, value)
     
@@ -283,25 +206,17 @@ def update_rate_card_item(rate_card_id: str, item_id: int, item: schemas.RateCar
         db.refresh(db_item)
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=400, detail=f"Error updating rate card item: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Error updating leisure item: {str(e)}")
     
     return db_item
 
 
-@app.delete("/api/rate-cards/{rate_card_id}/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_rate_card_item(rate_card_id: str, item_id: int, db: Session = Depends(get_db)):
-    """Delete a rate card item."""
-    try:
-        rate_card_uuid = uuid.UUID(rate_card_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid rate card ID format")
-    
-    db_item = db.query(models.RateCardItem).filter(
-        models.RateCardItem.id == item_id,
-        models.RateCardItem.rate_card_id == rate_card_uuid
-    ).first()
+@app.delete("/api/leisure-items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_leisure_item(item_id: int, db: Session = Depends(get_db)):
+    """Delete a leisure item."""
+    db_item = db.query(models.LeisureItem).filter(models.LeisureItem.id == item_id).first()
     if not db_item:
-        raise HTTPException(status_code=404, detail="Rate card item not found")
+        raise HTTPException(status_code=404, detail="Leisure item not found")
     
     db.delete(db_item)
     db.commit()

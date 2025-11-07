@@ -25,14 +25,14 @@ export default function Navigation() {
 
           <nav className="flex items-center gap-2">
             <Button
-              variant={location === "/rate-card" || location === "/" ? "default" : "ghost"}
+              variant={location === "/leisure-items" || location === "/" ? "default" : "ghost"}
               size="default"
               className="gap-2"
-              onClick={() => setLocation("/rate-card")}
-              data-testid="link-rate-card"
+              onClick={() => setLocation("/leisure-items")}
+              data-testid="link-leisure-items"
             >
               <FileText className="w-4 h-4" />
-              <span className="hidden sm:inline">Rate Card</span>
+              <span className="hidden sm:inline">Leisure Format</span>
             </Button>
             <Button
               variant={location === "/bills" ? "default" : "ghost"}

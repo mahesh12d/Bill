@@ -32,39 +32,31 @@ export const insertBillSchema = createInsertSchema(bills).omit({
 export type InsertBill = z.infer<typeof insertBillSchema>;
 export type Bill = typeof bills.$inferSelect;
 
-// Rate card types
-export interface RateCard {
-  id: string;
-  name: string;
-  createdDate: string;
-  items: RateCardItem[];
-}
-
-export interface RateCardItem {
+// Leisure item types
+export interface LeisureItem {
   id: number;
-  rateCardId: string;
   srNo: number;
   description: string;
   laborWork: string;
   materialSpecs: string;
   rateWithMaterial: string;
-  displayOrder: number;
 }
 
-export const createRateCardSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  createdDate: z.string(),
-});
-
-export const createRateCardItemSchema = z.object({
-  rateCardId: z.string().uuid(),
+export const createLeisureItemSchema = z.object({
   srNo: z.number().int().positive(),
   description: z.string().min(1),
-  laborWork: z.string(),
-  materialSpecs: z.string(),
-  rateWithMaterial: z.string(),
-  displayOrder: z.number().int().nonnegative(),
+  laborWork: z.string().min(1),
+  materialSpecs: z.string().min(1),
+  rateWithMaterial: z.string().min(1),
 });
 
-export type CreateRateCard = z.infer<typeof createRateCardSchema>;
-export type CreateRateCardItem = z.infer<typeof createRateCardItemSchema>;
+export const updateLeisureItemSchema = z.object({
+  srNo: z.number().int().positive().optional(),
+  description: z.string().min(1).optional(),
+  laborWork: z.string().min(1).optional(),
+  materialSpecs: z.string().min(1).optional(),
+  rateWithMaterial: z.string().min(1).optional(),
+});
+
+export type CreateLeisureItem = z.infer<typeof createLeisureItemSchema>;
+export type UpdateLeisureItem = z.infer<typeof updateLeisureItemSchema>;
