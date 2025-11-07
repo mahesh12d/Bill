@@ -1,9 +1,10 @@
 """Seed initial rate card data into the database."""
 import os
 import sys
+from datetime import date
 from sqlalchemy.orm import Session
 from .database import SessionLocal, engine, Base
-from .models import RateCardItem
+from .models import RateCard, RateCardItem
 
 
 def seed_rate_card_items():
@@ -12,10 +13,18 @@ def seed_rate_card_items():
     
     try:
         # Check if data already exists
-        existing_count = db.query(RateCardItem).count()
+        existing_count = db.query(RateCard).count()
         if existing_count > 0:
-            print(f"Rate card already has {existing_count} items. Skipping seed.")
+            print(f"Rate cards already exist. Skipping seed.")
             return
+        
+        # Create a default rate card first
+        default_rate_card = RateCard(
+            name="Standard Rate Format 2025",
+            created_date=date.today().isoformat()
+        )
+        db.add(default_rate_card)
+        db.flush()  # This gets us the ID without committing
         
         # Initial rate card data
         rate_items = [
@@ -85,13 +94,14 @@ def seed_rate_card_items():
             }
         ]
         
-        # Insert items
+        # Insert items with the rate card ID
         for item_data in rate_items:
+            item_data["rate_card_id"] = default_rate_card.id
             db_item = RateCardItem(**item_data)
             db.add(db_item)
         
         db.commit()
-        print(f"Successfully seeded {len(rate_items)} rate card items.")
+        print(f"Successfully seeded 1 rate card with {len(rate_items)} items.")
         
     except Exception as e:
         db.rollback()

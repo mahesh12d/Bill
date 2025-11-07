@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ import type { RateCard, RateCardItem } from "@shared/schema";
 
 export default function RateCards() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [selectedRateCard, setSelectedRateCard] = useState<RateCard | null>(null);
+  const [selectedRateCardId, setSelectedRateCardId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [newRateCardName, setNewRateCardName] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -55,6 +55,11 @@ export default function RateCards() {
   const { data: rateCards = [], isLoading } = useQuery<RateCard[]>({
     queryKey: ["/api/rate-cards"],
   });
+
+  const selectedRateCard = useMemo(
+    () => rateCards.find((card) => card.id === selectedRateCardId) || null,
+    [rateCards, selectedRateCardId]
+  );
 
   const createRateCardMutation = useMutation({
     mutationFn: async (name: string) => {
@@ -88,10 +93,10 @@ export default function RateCards() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rate-cards"] });
-      setDeleteConfirm(null);
-      if (selectedRateCard && selectedRateCard.id === deleteConfirm) {
-        setSelectedRateCard(null);
+      if (selectedRateCardId === deleteConfirm) {
+        setSelectedRateCardId(null);
       }
+      setDeleteConfirm(null);
       toast({
         title: "Rate card deleted",
         description: "The rate card has been removed.",
@@ -229,7 +234,7 @@ export default function RateCards() {
           <div>
             <Button
               variant="ghost"
-              onClick={() => setSelectedRateCard(null)}
+              onClick={() => setSelectedRateCardId(null)}
               className="mb-2"
               data-testid="button-back-to-list"
             >
@@ -488,7 +493,7 @@ export default function RateCards() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => setSelectedRateCard(rateCard)}
+                          onClick={() => setSelectedRateCardId(rateCard.id)}
                           data-testid={`button-view-${rateCard.id}`}
                         >
                           <Eye className="w-4 h-4" />
