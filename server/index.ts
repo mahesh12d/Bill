@@ -5,6 +5,32 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
+// Helper function to wait for FastAPI to be ready
+async function waitForFastAPI(maxRetries = 30, delayMs = 1000): Promise<boolean> {
+  const http = await import('http');
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const req = http.get('http://localhost:8000/api/health', (res) => {
+          if (res.statusCode === 200) {
+            resolve();
+          } else {
+            reject(new Error(`Status ${res.statusCode}`));
+          }
+        });
+        req.on('error', reject);
+        req.setTimeout(500);
+      });
+      log('FastAPI is ready');
+      return true;
+    } catch {
+      if (i === 0) log('Waiting for FastAPI to be ready...');
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+  return false;
+}
+
 // Start FastAPI server as a child process
 const fastapiProcess = spawn('python', ['run_fastapi.py'], {
   stdio: ['inherit', 'pipe', 'pipe'],
@@ -85,7 +111,7 @@ app.use('/api', createProxyMiddleware({
   target: 'http://localhost:8000',
   changeOrigin: true,
   pathRewrite: {
-    '^/': '/api/', // Add back /api prefix that Express strips
+    '^/': '/api/',
   },
   onProxyReq: (proxyReq, req, res) => {
     log(`Proxying ${req.method} ${req.url} to FastAPI`);
@@ -107,6 +133,9 @@ app.use('/api', createProxyMiddleware({
     res.status(status).json({ message });
     throw err;
   });
+
+  // Wait for FastAPI to be ready before starting Express server
+  await waitForFastAPI();
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
