@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Zap, FileText, Receipt } from "lucide-react";
+import { Zap, FileText, Receipt, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Navigation() {
@@ -43,6 +43,16 @@ export default function Navigation() {
             >
               <Receipt className="w-4 h-4" />
               <span className="hidden sm:inline">Bills</span>
+            </Button>
+            <Button
+              variant={location === "/admin/rate-card" ? "default" : "ghost"}
+              size="default"
+              className="gap-2"
+              onClick={() => setLocation("/admin/rate-card")}
+              data-testid="link-admin"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Manage</span>
             </Button>
           </nav>
         </div>

@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import RateCard from "@/pages/RateCard";
 import Bills from "@/pages/Bills";
+import RateCardAdmin from "@/pages/RateCardAdmin";
 import Navigation from "@/components/Navigation";
 
 function Router() {
@@ -14,6 +15,7 @@ function Router() {
       <Route path="/" component={RateCard} />
       <Route path="/rate-card" component={RateCard} />
       <Route path="/bills" component={Bills} />
+      <Route path="/admin/rate-card" component={RateCardAdmin} />
       <Route component={NotFound} />
     </Switch>
   );

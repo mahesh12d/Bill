@@ -2,72 +2,47 @@ import RateCardHeader from "@/components/RateCardHeader";
 import RateCardTable from "@/components/RateCardTable";
 import RateCardNotes from "@/components/RateCardNotes";
 import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
+import { Printer, Loader2 } from "lucide-react";
 import type { RateItem } from "@/components/RateCardTable";
-
-const rateItems: RateItem[] = [
-  {
-    srNo: 1,
-    description: "Standard Lighting/Fan Point Fitting & Wiring (Tube Light, Fan, Light Point)",
-    laborWork: "₹250",
-    materialSpecs: "Vinay Adora Switches, Polycab/Patel Wires/Cables",
-    rateWithMaterial: "₹750",
-  },
-  {
-    srNo: 2,
-    description: "Computer/Power Board Wiring Point (1 Point)",
-    laborWork: "₹200",
-    materialSpecs: "Vinay Adora Switches, Polycab/Patel Wires/Cables",
-    rateWithMaterial: "₹600",
-  },
-  {
-    srNo: 3,
-    description: "A.C. (Air Conditioner) Power Point",
-    laborWork: "₹300",
-    materialSpecs: "Heavy Duty Wire/Socket, MCB",
-    rateWithMaterial: "₹900",
-  },
-  {
-    srNo: 4,
-    description: "Ceiling Fan Fitting (Labor Only)",
-    laborWork: "₹150",
-    materialSpecs: "-",
-    rateWithMaterial: "-",
-  },
-  {
-    srNo: 5,
-    description: "Ceiling Fan Fitting with Dimmer (Supply & Install)",
-    laborWork: "-",
-    materialSpecs: "Supply of Standard Dimmer/Regulator",
-    rateWithMaterial: "₹500",
-  },
-  {
-    srNo: 6,
-    description: "Fan Down Hook/J-Hook Fitting (Supply & Install)",
-    laborWork: "-",
-    materialSpecs: "Supply of Standard J-Hook/Down Rod Set",
-    rateWithMaterial: "₹250",
-  },
-  {
-    srNo: 7,
-    description: "Dome/LED Light Fitting (Labor Only)",
-    laborWork: "₹100",
-    materialSpecs: "-",
-    rateWithMaterial: "-",
-  },
-  {
-    srNo: 8,
-    description: "Distribution Board (DB) Point/Wiring",
-    laborWork: "Quoted Separately",
-    materialSpecs: "Based on Circuit Load & Size",
-    rateWithMaterial: "Quoted Separately",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
 
 export default function RateCard() {
+  const { data: rateItems, isLoading, error } = useQuery<RateItem[]>({
+    queryKey: ["/api/rate-card"],
+    queryFn: async () => {
+      const response = await fetch("/api/rate-card");
+      if (!response.ok) {
+        throw new Error("Failed to fetch rate card items");
+      }
+      return response.json();
+    },
+  });
+
   const handlePrint = () => {
     window.print();
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground">Loading rate card...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-destructive">Error loading rate card</p>
+          <p className="text-sm text-muted-foreground">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -86,7 +61,7 @@ export default function RateCard() {
           </Button>
         </div>
 
-        <RateCardTable items={rateItems} />
+        <RateCardTable items={rateItems || []} />
 
         <RateCardNotes />
 
