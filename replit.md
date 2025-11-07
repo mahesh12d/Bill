@@ -4,10 +4,11 @@
 
 This is a professional electrical services rate card and billing management application for Mahesh Electrical Engineers. The application serves two primary purposes:
 
-1. **Rate Card Display**: Presents a professional, print-ready rate card showing standard pricing for electrical services (lighting, fans, power points, A.C. installation, etc.)
-2. **Bill Management**: Allows creation, viewing, and management of customer bills with line items, automatic calculations, and print functionality
+1. **Rate Card Management**: Create and manage multiple rate card documents, each containing pricing for electrical services (lighting, fans, power points, A.C. installation, etc.). Users can create multiple rate cards with different names (e.g., "Standard Rate Format 2025", "Premium Services Rate Card"), add/edit/delete items within each rate card, and manage them independently.
 
-The application is built as a full-stack web application using React for the frontend and Express for the backend, with a focus on professional business documentation and clean, readable design following Material Design principles.
+2. **Bill Management**: Create, view, and manage customer bills with line items, automatic calculations, and print functionality.
+
+The application is built as a full-stack web application using React for the frontend, Express as a proxy server, and FastAPI as the backend API, with PostgreSQL for data persistence. The design focuses on professional business documentation with clean, readable styling.
 
 ## User Preferences
 
@@ -44,12 +45,22 @@ Preferred communication style: Simple, everyday language.
 **Server Framework**: Express.js with TypeScript (ESM modules)
 
 **API Design**: RESTful JSON API with the following endpoints:
+
+*Bills:*
 - `GET /api/bills` - Retrieve all bills
 - `GET /api/bills/:id` - Retrieve specific bill
 - `GET /api/bills-next-number` - Get next available bill number
 - `POST /api/bills` - Create new bill
 - `PUT /api/bills/:id` - Update existing bill
 - `DELETE /api/bills/:id` - Delete bill
+
+*Rate Cards:*
+- `GET /api/rate-cards` - Retrieve all rate cards with their items
+- `POST /api/rate-cards` - Create new rate card
+- `DELETE /api/rate-cards/:id` - Delete rate card and all its items
+- `POST /api/rate-cards/:id/items` - Create new item in a rate card
+- `PUT /api/rate-cards/:id/items/:itemId` - Update rate card item
+- `DELETE /api/rate-cards/:id/items/:itemId` - Delete rate card item
 
 **Request Handling**:
 - JSON body parsing with raw body preservation for potential webhook integrations
@@ -63,20 +74,33 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage Solutions
 
-**Current Implementation**: In-memory storage (MemStorage class)
-- Map-based storage for bills
-- Auto-incrementing bill counter
-- Sorted retrieval (newest first)
+**Current Implementation**: PostgreSQL database with SQLAlchemy ORM
 
-**Database Schema (Drizzle ORM)**: PostgreSQL schema defined for future database integration
-- `bills` table with the following structure:
-  - `id`: UUID primary key (auto-generated)
-  - `billNo`: Text field for bill number
-  - `date`: Text field for bill date
-  - `customerName`: Text field
-  - `lineItems`: JSONB array of line items (srNo, description, qty, rate, amount)
-  - `total`: Double precision for total amount
-  - `amountInWords`: Text representation of total
+**Database Schema**: 
+
+*Bills Table:*
+- `id`: UUID primary key (auto-generated)
+- `bill_no`: Text field for bill number
+- `date`: Text field for bill date
+- `customer_name`: Text field
+- `line_items`: JSONB array of line items (srNo, description, qty, rate, amount)
+- `total`: Double precision for total amount
+- `amount_in_words`: Text representation of total
+
+*Rate Cards Table:*
+- `id`: UUID primary key (auto-generated)
+- `name`: Text field for rate card name (e.g., "Standard Rate Format 2025")
+- `created_date`: Text field for creation date
+
+*Rate Card Items Table:*
+- `id`: Integer primary key (auto-increment)
+- `rate_card_id`: UUID foreign key to rate_cards table
+- `sr_no`: Integer for serial number
+- `description`: Text field for service description
+- `labor_work`: VARCHAR for labor cost
+- `material_specs`: Text field for material specifications
+- `rate_with_material`: VARCHAR for total rate with materials
+- `display_order`: Integer for ordering items
 
 **Data Validation**: Zod schemas for runtime type checking
 - `billLineItemSchema`: Validates individual line items
