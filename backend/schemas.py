@@ -33,12 +33,19 @@ class BillUpdate(BillBase):
     pass
 
 
-class Bill(BillBase):
+class Bill(BaseModel):
     """Schema for bill response."""
     id: UUID
+    billNo: str = Field(alias="bill_no")
+    date: str
+    customerName: str = Field(alias="customer_name")
+    lineItems: List[LineItem] = Field(alias="line_items")
+    total: float
+    amountInWords: str = Field(alias="amount_in_words")
 
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 class RateCardBase(BaseModel):
@@ -77,36 +84,29 @@ class RateCardItemUpdate(BaseModel):
     displayOrder: Optional[int] = None
 
 
-class RateCardItem(RateCardItemBase):
+class RateCardItem(BaseModel):
     """Schema for rate card item response."""
     id: int
-    rateCardId: UUID
+    rateCardId: UUID = Field(alias="rate_card_id")
+    srNo: int = Field(alias="sr_no")
+    description: str
+    laborWork: str = Field(alias="labor_work")
+    materialSpecs: str = Field(alias="material_specs")
+    rateWithMaterial: str = Field(alias="rate_with_material")
+    displayOrder: int = Field(alias="display_order")
 
     class Config:
         from_attributes = True
         populate_by_name = True
-    
-    @classmethod
-    def model_validate(cls, obj):
-        """Custom validation to map snake_case DB fields to camelCase."""
-        if hasattr(obj, 'sr_no'):
-            return cls(
-                id=obj.id,
-                rateCardId=obj.rate_card_id,
-                srNo=obj.sr_no,
-                description=obj.description,
-                laborWork=obj.labor_work,
-                materialSpecs=obj.material_specs,
-                rateWithMaterial=obj.rate_with_material,
-                displayOrder=obj.display_order
-            )
-        return super().model_validate(obj)
 
 
-class RateCard(RateCardBase):
+class RateCard(BaseModel):
     """Schema for rate card response."""
     id: UUID
+    name: str
+    createdDate: str = Field(alias="created_date")
     items: List[RateCardItem] = []
 
     class Config:
         from_attributes = True
+        populate_by_name = True
