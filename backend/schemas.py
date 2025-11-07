@@ -41,6 +41,17 @@ class Bill(BillBase):
         from_attributes = True
 
 
+class RateCardBase(BaseModel):
+    """Base schema for rate card."""
+    name: str
+    createdDate: str
+
+
+class RateCardCreate(RateCardBase):
+    """Schema for creating a rate card."""
+    pass
+
+
 class RateCardItemBase(BaseModel):
     """Base schema for rate card item."""
     srNo: int
@@ -53,7 +64,7 @@ class RateCardItemBase(BaseModel):
 
 class RateCardItemCreate(RateCardItemBase):
     """Schema for creating a rate card item."""
-    pass
+    rateCardId: UUID
 
 
 class RateCardItemUpdate(BaseModel):
@@ -69,6 +80,7 @@ class RateCardItemUpdate(BaseModel):
 class RateCardItem(RateCardItemBase):
     """Schema for rate card item response."""
     id: int
+    rateCardId: UUID
 
     class Config:
         from_attributes = True
@@ -80,6 +92,7 @@ class RateCardItem(RateCardItemBase):
         if hasattr(obj, 'sr_no'):
             return cls(
                 id=obj.id,
+                rateCardId=obj.rate_card_id,
                 srNo=obj.sr_no,
                 description=obj.description,
                 laborWork=obj.labor_work,
@@ -88,3 +101,12 @@ class RateCardItem(RateCardItemBase):
                 displayOrder=obj.display_order
             )
         return super().model_validate(obj)
+
+
+class RateCard(RateCardBase):
+    """Schema for rate card response."""
+    id: UUID
+    items: List[RateCardItem] = []
+
+    class Config:
+        from_attributes = True
