@@ -32,11 +32,39 @@ export const insertBillSchema = createInsertSchema(bills).omit({
 export type InsertBill = z.infer<typeof insertBillSchema>;
 export type Bill = typeof bills.$inferSelect;
 
-// Rate card item types (for reference)
+// Rate card types
+export interface RateCard {
+  id: string;
+  name: string;
+  createdDate: string;
+  items: RateCardItem[];
+}
+
 export interface RateCardItem {
+  id: number;
+  rateCardId: string;
   srNo: number;
   description: string;
   laborWork: string;
   materialSpecs: string;
   rateWithMaterial: string;
+  displayOrder: number;
 }
+
+export const createRateCardSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  createdDate: z.string(),
+});
+
+export const createRateCardItemSchema = z.object({
+  rateCardId: z.string().uuid(),
+  srNo: z.number().int().positive(),
+  description: z.string().min(1),
+  laborWork: z.string(),
+  materialSpecs: z.string(),
+  rateWithMaterial: z.string(),
+  displayOrder: z.number().int().nonnegative(),
+});
+
+export type CreateRateCard = z.infer<typeof createRateCardSchema>;
+export type CreateRateCardItem = z.infer<typeof createRateCardItemSchema>;
