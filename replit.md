@@ -1,10 +1,10 @@
-# Mahesh Electrical Engineers - Rate Card & Billing Application
+# Mahesh Electrical Engineers - Leisure Format & Billing Application
 
 ## Overview
 
-This is a professional electrical services rate card and billing management application for Mahesh Electrical Engineers. The application serves two primary purposes:
+This is a professional electrical services billing application for Mahesh Electrical Engineers. The application serves two primary purposes:
 
-1. **Rate Card Management**: Create and manage multiple rate card documents, each containing pricing for electrical services (lighting, fans, power points, A.C. installation, etc.). Users can create multiple rate cards with different names (e.g., "Standard Rate Format 2025", "Premium Services Rate Card"), add/edit/delete items within each rate card, and manage them independently.
+1. **Leisure Format Display**: View a standardized leisure format table containing pricing for electrical services (lighting, fans, power points, A.C. installation, etc.). The leisure format displays: serial number, description, labour work, material specifications, and rate with material.
 
 2. **Bill Management**: Create, view, and manage customer bills with line items, automatic calculations, and print functionality.
 
@@ -26,7 +26,7 @@ Preferred communication style: Simple, everyday language.
 - Comprehensive component library including forms, tables, dialogs, cards, and navigation elements
 
 **Routing**: Wouter (lightweight client-side routing)
-- Two main routes: `/rate-card` (home) and `/bills`
+- Two main routes: `/leisure-items` (home) and `/bills`
 - Simple Switch/Route structure without server-side rendering
 
 **State Management**: 
@@ -38,7 +38,7 @@ Preferred communication style: Simple, everyday language.
 - Professional business documentation aesthetic
 - Inter font family for clean, legible typography
 - Responsive layout with mobile considerations
-- Print-optimized styling for rate cards and bills
+- Print-optimized styling for leisure format and bills
 
 ### Backend Architecture
 
@@ -54,13 +54,8 @@ Preferred communication style: Simple, everyday language.
 - `PUT /api/bills/:id` - Update existing bill
 - `DELETE /api/bills/:id` - Delete bill
 
-*Rate Cards:*
-- `GET /api/rate-cards` - Retrieve all rate cards with their items
-- `POST /api/rate-cards` - Create new rate card
-- `DELETE /api/rate-cards/:id` - Delete rate card and all its items
-- `POST /api/rate-cards/:id/items` - Create new item in a rate card
-- `PUT /api/rate-cards/:id/items/:itemId` - Update rate card item
-- `DELETE /api/rate-cards/:id/items/:itemId` - Delete rate card item
+*Leisure Items:*
+- `GET /api/leisure-items` - Retrieve all leisure format items
 
 **Request Handling**:
 - JSON body parsing with raw body preservation for potential webhook integrations
@@ -87,20 +82,13 @@ Preferred communication style: Simple, everyday language.
 - `total`: Double precision for total amount
 - `amount_in_words`: Text representation of total
 
-*Rate Cards Table:*
+*Leisure Items Table:*
 - `id`: UUID primary key (auto-generated)
-- `name`: Text field for rate card name (e.g., "Standard Rate Format 2025")
-- `created_date`: Text field for creation date
-
-*Rate Card Items Table:*
-- `id`: Integer primary key (auto-increment)
-- `rate_card_id`: UUID foreign key to rate_cards table
-- `sr_no`: Integer for serial number
+- `sr_no`: Integer for serial number (unique)
 - `description`: Text field for service description
 - `labor_work`: VARCHAR for labor cost
 - `material_specs`: Text field for material specifications
 - `rate_with_material`: VARCHAR for total rate with materials
-- `display_order`: Integer for ordering items
 
 **Data Validation**: Zod schemas for runtime type checking
 - `billLineItemSchema`: Validates individual line items
